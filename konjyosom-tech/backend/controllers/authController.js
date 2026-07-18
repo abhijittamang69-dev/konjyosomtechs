@@ -60,7 +60,7 @@ const login = async (req, res) => {
         firstLogin: user.firstLogin,
         needsPasswordChange: needsPasswordChange
       },
-      redirectTo: user.role === 'admin' ? '/admin/dashboard' : '/technician/dashboard'
+      redirectTo: user.role === 'admin' ? '/admin/dashboard.html' : '/technician/dashboard.html'
     });
   } catch (error) {
     console.error('Login error:', error);
