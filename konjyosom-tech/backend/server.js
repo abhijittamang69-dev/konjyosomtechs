@@ -16,7 +16,12 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Security Middleware
-app.use(helmet());
+// CSP disabled: the site relies on inline scripts and CDN assets (Bootstrap/FontAwesome),
+// which helmet's default strict CSP blocks. Other helmet protections stay enabled.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 app.use(compression());
 app.use(cookieParser());
 
