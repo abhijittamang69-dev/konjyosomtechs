@@ -29,7 +29,9 @@ app.use(cookieParser());
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:3000',
-  'https://konjyosomtechs.onrender.com'
+  'https://konjyosomtechs.onrender.com',
+  'https://konjyosomtech.com',
+  'https://www.konjyosomtech.com'
 ].filter(Boolean);
 
 app.use(cors({
