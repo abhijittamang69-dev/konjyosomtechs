@@ -344,6 +344,8 @@
                         <p>${wo.description || 'No description'}</p>
                         ${wo.serviceNotes ? `<hr><h6 class="text-primary">Service Notes</h6><p>${wo.serviceNotes}</p>` : ''}
                         ${wo.customerSignature ? `<hr><h6 class="text-primary">Customer Signature</h6><img src="${wo.customerSignature}" style="max-width: 300px; border: 1px solid #ddd; border-radius: 8px;">` : ''}
+                        ${(wo.beforePhotos?.length || wo.afterPhotos?.length) ? `<hr><h6 class="text-primary">Work Photos</h6><div class="row g-2">${(wo.beforePhotos || []).map(p => `<div class="col-3 text-center"><a href="${p}" target="_blank"><img src="${p}" class="img-fluid rounded" style="height:70px;object-fit:cover;"></a><small class="d-block text-muted">Before</small></div>`).join('')}${(wo.afterPhotos || []).map(p => `<div class="col-3 text-center"><a href="${p}" target="_blank"><img src="${p}" class="img-fluid rounded" style="height:70px;object-fit:cover;"></a><small class="d-block text-muted">After</small></div>`).join('')}</div>` : ''}
+                        ${(wo.reportUrl || wo.reportFile) ? `<hr><h6 class="text-primary">Reports & Files</h6>${wo.reportUrl ? `<a href="${wo.reportUrl}" target="_blank" class="btn btn-sm btn-outline-danger me-2 mb-1"><i class="fas fa-file-pdf me-1"></i> Generated Service Report</a>` : ''}${wo.reportFile ? `<a href="${wo.reportFile}" target="_blank" class="btn btn-sm btn-outline-primary mb-1"><i class="fas fa-file me-1"></i> ${wo.reportFileName || 'Technician Report'}</a>` : ''}` : ''}
                     `;
                     new bootstrap.Modal(document.getElementById('viewModal')).show();
                 }

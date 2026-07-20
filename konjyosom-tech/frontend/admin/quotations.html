@@ -55,14 +55,14 @@
             <!-- Filters -->
             <div class="card p-3 mb-4">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <label class="form-label">Search</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                             <input type="text" class="form-control" id="searchInput" placeholder="Search by name, ID, project type...">
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">Status</label>
                         <select class="form-select" id="statusFilter">
                             <option value="">All Status</option>
@@ -73,9 +73,14 @@
                             <option value="rejected">Rejected</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <button class="btn btn-primary w-100" onclick="loadQuotations()">
                             <i class="fas fa-filter me-1"></i> Filter
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success w-100" onclick="exportQuotations()">
+                            <i class="fas fa-file-csv me-1"></i> Export CSV
                         </button>
                     </div>
                 </div>
@@ -326,6 +331,26 @@
                 }
             } catch (error) {
                 showAlert('danger', 'Failed to delete quotation');
+            }
+        }
+
+        async function exportQuotations() {
+            try {
+                showAlert('info', 'Preparing CSV export...');
+                const response = await Auth.apiCall('/quotations/export/csv');
+                if (!response) return;
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `quotations-${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showAlert('success', 'Quotations exported to CSV');
+            } catch (error) {
+                showAlert('danger', 'Export failed');
             }
         }
 

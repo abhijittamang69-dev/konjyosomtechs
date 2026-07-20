@@ -52,6 +52,9 @@ const workOrderSchema = new mongoose.Schema({
   completedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   reportGenerated: { type: Boolean, default: false },
   reportUrl: { type: String },
+  reportFile: { type: String },
+  reportFileName: { type: String },
+  closedAt: { type: Date },
   // Admin
   adminNotes: { type: String },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

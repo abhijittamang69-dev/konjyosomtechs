@@ -360,8 +360,24 @@
             }
         }
 
-        function exportBookings() {
-            showAlert('info', 'Export feature coming soon');
+        async function exportBookings() {
+            try {
+                showAlert('info', 'Preparing CSV export...');
+                const response = await Auth.apiCall('/bookings/export/csv');
+                if (!response) return;
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `bookings-${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showAlert('success', 'Bookings exported to CSV');
+            } catch (error) {
+                showAlert('danger', 'Export failed');
+            }
         }
 
         // Debounced search

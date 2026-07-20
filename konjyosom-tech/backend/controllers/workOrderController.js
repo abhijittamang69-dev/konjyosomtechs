@@ -401,6 +401,48 @@ const getWorkOrderStats = async (req, res) => {
   }
 };
 
+// @desc    Upload final report and close work order
+// @route   PUT /api/workorders/:id/report
+// @access  Technician (own assignment)
+const uploadReportAndClose = async (req, res) => {
+  try {
+    const { reportFile, reportFileName } = req.body;
+
+    if (!reportFile) {
+      return res.status(400).json({ message: 'Report file is required to close the work' });
+    }
+
+    const workOrder = await WorkOrder.findById(req.params.id);
+    if (!workOrder) {
+      return res.status(404).json({ message: 'Work order not found' });
+    }
+
+    if (workOrder.assignedTechnician?.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    if (workOrder.status !== 'completed') {
+      return res.status(400).json({ message: 'Work order must be completed before it can be closed' });
+    }
+
+    workOrder.reportFile = reportFile;
+    workOrder.reportFileName = reportFileName || 'service-report';
+    workOrder.status = 'closed';
+    workOrder.closedAt = new Date();
+    workOrder.statusHistory.push({
+      status: 'closed',
+      changedBy: req.user._id,
+      notes: 'Final report uploaded, work closed'
+    });
+
+    await workOrder.save();
+
+    res.json({ success: true, message: 'Report uploaded. Work order closed.', workOrder });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createWorkOrder,
   getAllWorkOrders,
@@ -411,5 +453,6 @@ module.exports = {
   addNotes,
   captureSignature,
   completeWorkOrder,
+  uploadReportAndClose,
   getWorkOrderStats
 };

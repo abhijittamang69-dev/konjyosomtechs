@@ -206,6 +206,29 @@ const getBookingStats = async (req, res) => {
   }
 };
 
+// @desc    Export all bookings as CSV
+// @route   GET /api/bookings/export/csv
+// @access  Admin
+const exportBookingsCsv = async (req, res) => {
+  try {
+    const bookings = await Booking.find().populate('assignedTechnician', 'name').sort('-createdAt');
+    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const header = ['Booking ID', 'Name', 'Company', 'Phone', 'Email', 'Location', 'Service Type', 'Preferred Date', 'Status', 'Priority', 'Technician', 'Description', 'Created At'];
+    const rows = bookings.map(b => [
+      b.bookingId, b.name, b.company || '', b.phone, b.email || '', b.location,
+      b.serviceType, b.preferredDate ? new Date(b.preferredDate).toISOString().slice(0, 10) : '',
+      b.status, b.priority, b.assignedTechnician?.name || '', b.description || '',
+      b.createdAt ? new Date(b.createdAt).toISOString() : ''
+    ].map(esc).join(','));
+    const csv = '﻿' + [header.map(esc).join(','), ...rows].join('\r\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="bookings-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createBooking,
   getAllBookings,
@@ -213,5 +236,6 @@ module.exports = {
   updateBookingStatus,
   assignTechnician,
   deleteBooking,
-  getBookingStats
+  getBookingStats,
+  exportBookingsCsv
 };

@@ -164,11 +164,36 @@ const getQuotationStats = async (req, res) => {
   }
 };
 
+// @desc    Export all quotations as CSV
+// @route   GET /api/quotations/export/csv
+// @access  Admin
+const exportQuotationsCsv = async (req, res) => {
+  try {
+    const quotations = await Quotation.find().sort('-createdAt');
+    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const header = ['Quotation ID', 'Name', 'Company', 'Phone', 'Email', 'Project Type', 'Location', 'Requirements', 'Status', 'Quoted Amount', 'Valid Until', 'Approved By', 'Notes', 'Created At'];
+    const rows = quotations.map(q => [
+      q.quotationId, q.name, q.company || '', q.phone, q.email || '', q.projectType,
+      q.location || '', q.requirements || '', q.status, q.quotedAmount ?? '',
+      q.validUntil ? new Date(q.validUntil).toISOString().slice(0, 10) : '',
+      q.approvedBy || '', q.notes || '',
+      q.createdAt ? new Date(q.createdAt).toISOString() : ''
+    ].map(esc).join(','));
+    const csv = '﻿' + [header.map(esc).join(','), ...rows].join('\r\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="quotations-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createQuotation,
   getAllQuotations,
   getQuotationById,
   updateQuotation,
   deleteQuotation,
-  getQuotationStats
+  getQuotationStats,
+  exportQuotationsCsv
 };

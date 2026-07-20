@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createWorkOrder, getAllWorkOrders, getWorkOrderById, updateStatus, acceptWorkOrder, uploadPhotos, addNotes, captureSignature, completeWorkOrder, getWorkOrderStats } = require('../controllers/workOrderController');
+const { createWorkOrder, getAllWorkOrders, getWorkOrderById, updateStatus, acceptWorkOrder, uploadPhotos, addNotes, captureSignature, completeWorkOrder, uploadReportAndClose, getWorkOrderStats } = require('../controllers/workOrderController');
 const { protect, adminOnly, technicianOnly, adminOrTechnician } = require('../middleware/auth');
 
 router.post('/', protect, adminOnly, createWorkOrder);
@@ -13,5 +13,6 @@ router.put('/:id/photos', protect, technicianOnly, uploadPhotos);
 router.put('/:id/notes', protect, technicianOnly, addNotes);
 router.put('/:id/signature', protect, technicianOnly, captureSignature);
 router.put('/:id/complete', protect, technicianOnly, completeWorkOrder);
+router.put('/:id/report', protect, technicianOnly, uploadReportAndClose);
 
 module.exports = router;
