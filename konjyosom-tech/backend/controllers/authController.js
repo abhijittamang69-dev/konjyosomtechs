@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Technician = require('../models/Technician');
 const Session = require('../models/Session');
+const WorkOrder = require('../models/WorkOrder');
 const generateToken = require('../utils/generateToken');
 const { sendEmail, emailTemplates } = require('../utils/emailService');
 const { logActivity } = require('../utils/activityLogger');
@@ -81,7 +82,21 @@ const getMe = async (req, res) => {
 
     let technicianData = null;
     if (user.role === 'technician') {
-      technicianData = await Technician.findOne({ user: user._id });
+      const profile = await Technician.findOne({ user: user._id });
+
+      // Compute live performance stats from actual work orders
+      const totalJobs = await WorkOrder.countDocuments({ assignedTechnician: user._id });
+      const completedJobs = await WorkOrder.countDocuments({ assignedTechnician: user._id, status: { $in: ['completed', 'closed'] } });
+      const activeJobs = await WorkOrder.countDocuments({ assignedTechnician: user._id, status: { $in: ['assigned', 'accepted', 'on_site', 'in_progress'] } });
+      const completionRate = totalJobs > 0 ? Math.round((completedJobs / totalJobs) * 100) : 0;
+
+      technicianData = {
+        ...(profile ? profile.toObject() : {}),
+        totalJobs,
+        completedJobs,
+        activeJobs,
+        completionRate
+      };
     }
 
     res.json({
