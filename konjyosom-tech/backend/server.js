@@ -83,6 +83,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/konjyosom
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/customers', require('./routes/customerRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/quotations', require('./routes/quotationRoutes'));
 app.use('/api/workorders', require('./routes/workOrderRoutes'));
