@@ -23,33 +23,34 @@ body {
 .navbar {
     background: rgba(188, 211, 225, 0.95);
     backdrop-filter: blur(10px);
-    padding: 1rem 0;
+    padding: 0.4rem 0;
     transition: all 0.3s ease;
     z-index: 999;
 }
 .navbar.scrolled {
     background: rgba(188, 211, 225, 1);
     box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-    padding: 0.5rem 0;
+    padding: 0.25rem 0;
 }
 .navbar-brand {
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.15rem;
     color: white !important;
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 .navbar-brand img {
-    max-height: 50px;
+    max-height: 34px;
     width: auto;
     object-fit: contain;
-    margin-left: 50px;
+    margin-left: 20px;
 }
 .nav-link {
     color: rgba(19, 41, 125, 0.85) !important;
     font-weight: 500;
-    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem;
+    padding: 0.35rem 0.75rem !important;
     transition: all 0.3s ease;
     position: relative;
 }

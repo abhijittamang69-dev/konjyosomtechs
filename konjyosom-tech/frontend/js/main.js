@@ -398,8 +398,21 @@ function initMobileMenu() {
     const sidebar = document.querySelector('.dashboard-sidebar');
 
     if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener('click', () => {
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             sidebar.classList.toggle('show');
+        });
+
+        // Close sidebar when tapping anywhere outside it
+        document.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('show') && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Close sidebar after tapping any menu link
+        sidebar.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => sidebar.classList.remove('show'));
         });
     }
 }
