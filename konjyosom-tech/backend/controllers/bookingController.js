@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Customer = require('../models/Customer');
+const WorkOrder = require('../models/WorkOrder');
 const { sendEmail, emailTemplates } = require('../utils/emailService');
 
 // @desc    Create new booking (public)
@@ -151,6 +152,34 @@ const assignTechnician = async (req, res) => {
 
     booking.assignedTechnician = technicianId;
     booking.status = 'assigned';
+
+    // Auto-create / sync a work order so the technician can see and action the job
+    if (!booking.workOrder) {
+      const workOrder = await WorkOrder.create({
+        booking: booking._id,
+        customer: booking.customer,
+        customerName: booking.name,
+        customerPhone: booking.phone,
+        customerEmail: booking.email,
+        serviceType: booking.serviceType,
+        location: booking.location,
+        priority: booking.priority || 'medium',
+        assignedTechnician: technicianId,
+        dueDate: booking.preferredDate,
+        description: booking.description,
+        status: 'assigned',
+        createdBy: req.user._id,
+        statusHistory: [{ status: 'assigned', changedBy: req.user._id, notes: 'Assigned from booking' }]
+      });
+      booking.workOrder = workOrder._id;
+    } else {
+      await WorkOrder.findByIdAndUpdate(booking.workOrder, {
+        assignedTechnician: technicianId,
+        status: 'assigned',
+        $push: { statusHistory: { status: 'assigned', changedBy: req.user._id, notes: 'Reassigned from booking' } }
+      });
+    }
+
     await booking.save();
 
     const populatedBooking = await Booking.findById(booking._id)
