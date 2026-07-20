@@ -335,6 +335,18 @@ const completeWorkOrder = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
+    if (!workOrder.serviceNotes || !workOrder.serviceNotes.trim()) {
+      return res.status(400).json({ message: 'Work description is required before completion' });
+    }
+
+    if (workOrder.laborHours === undefined || workOrder.laborHours === null || workOrder.laborHours === '') {
+      return res.status(400).json({ message: 'Labor hours are required before completion' });
+    }
+
+    if (!workOrder.materialsUsed || workOrder.materialsUsed.length === 0) {
+      return res.status(400).json({ message: 'At least one material used is required before completion' });
+    }
+
     if (!workOrder.customerSignature) {
       return res.status(400).json({ message: 'Customer signature is required before completion' });
     }
