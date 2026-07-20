@@ -47,7 +47,7 @@ body {
     margin-left: 50px;
 }
 .nav-link {
-    color: rgba(128, 255, 0, 0.95) !important;
+    color: rgba(19, 41, 125, 0.85) !important;
     font-weight: 500;
     padding: 0.5rem 1rem !important;
     transition: all 0.3s ease;
@@ -65,7 +65,7 @@ body {
     transform: translateX(-50%);
 }
 .nav-link:hover::after, .nav-link.active::after { width: 80%; }
-.nav-link:hover, .nav-link.active { color: rgba(128, 255, 0, 1) !important; }
+.nav-link:hover, .nav-link.active { color: rgba(19, 41, 125, 1) !important; }
 .nav-link.btn-primary {
     background: var(--secondary);
     border-color: var(--secondary);
