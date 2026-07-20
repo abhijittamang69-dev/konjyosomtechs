@@ -1,21 +1,22 @@
 const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
 
+// Generates the service report PDF in memory and returns it as a base64 data URL.
+// Stored directly in MongoDB (like photos/signatures) so reports survive server
+// restarts and redeploys — no local disk storage involved.
 const generateServiceReport = async (workOrder, technician, companySettings) => {
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument();
-      const filename = `report-${workOrder.workOrderId}-${Date.now()}.pdf`;
-      const filepath = path.join(__dirname, '../uploads/reports', filename);
-
-      // Ensure directory exists
-      if (!fs.existsSync(path.dirname(filepath))) {
-        fs.mkdirSync(path.dirname(filepath), { recursive: true });
-      }
-
-      const stream = fs.createWriteStream(filepath);
-      doc.pipe(stream);
+      const chunks = [];
+      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        resolve({
+          filename: `report-${workOrder.workOrderId}.pdf`,
+          url: `data:application/pdf;base64,${buffer.toString('base64')}`
+        });
+      });
+      doc.on('error', reject);
 
       // Header
       doc.fontSize(24).text('SERVICE REPORT', 50, 50);
@@ -86,12 +87,6 @@ const generateServiceReport = async (workOrder, technician, companySettings) => 
       doc.text('For support: support@konjyosomtech.com | Phone: +977-XXXXXXXXXX', 50, 715, { align: 'center' });
 
       doc.end();
-
-      stream.on('finish', () => {
-        resolve({ filename, filepath, url: `/uploads/reports/${filename}` });
-      });
-
-      stream.on('error', reject);
     } catch (error) {
       reject(error);
     }

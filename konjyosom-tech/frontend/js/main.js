@@ -455,9 +455,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// ============================================
+// OPEN FILE (data URL or regular URL in new tab)
+// ============================================
+function openFile(fileUrl, fallbackName = 'file') {
+    if (!fileUrl) return;
+    if (!fileUrl.startsWith('data:')) {
+        window.open(fileUrl, '_blank');
+        return;
+    }
+    try {
+        const [meta, b64] = fileUrl.split(',');
+        const mime = (meta.match(/data:(.*?);/) || [])[1] || 'application/octet-stream';
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const blobUrl = URL.createObjectURL(new Blob([bytes], { type: mime }));
+        window.open(blobUrl, '_blank');
+    } catch (e) {
+        console.error('openFile error:', e);
+    }
+}
+
 // Expose globally
 window.API_BASE_URL = API_BASE_URL;
 window.Auth = Auth;
 window.Utils = Utils;
 window.DataTable = DataTable;
 window.showAlert = showAlert;
+window.openFile = openFile;

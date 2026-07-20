@@ -3,6 +3,7 @@ const Booking = require('../models/Booking');
 const User = require('../models/User');
 const { sendEmail, emailTemplates } = require('../utils/emailService');
 const { generateServiceReport } = require('../utils/pdfGenerator');
+const { logActivity } = require('../utils/activityLogger');
 
 // @desc    Create work order from booking
 // @route   POST /api/workorders
@@ -179,6 +180,8 @@ const updateStatus = async (req, res) => {
 
     await workOrder.save();
 
+    await logActivity(req, `Status updated to ${status} (${workOrder.workOrderId})`, 'workorder', workOrder._id, { oldStatus, newStatus: status });
+
     res.json({ success: true, message: 'Status updated', workOrder });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -222,6 +225,8 @@ const acceptWorkOrder = async (req, res) => {
 
     await workOrder.save();
 
+    await logActivity(req, accept ? `Accepted work order (${workOrder.workOrderId})` : `Rejected work order (${workOrder.workOrderId})`, 'workorder', workOrder._id, { accept, reason });
+
     res.json({
       success: true,
       message: accept ? 'Work order accepted' : 'Work order rejected',
@@ -254,6 +259,8 @@ const uploadPhotos = async (req, res) => {
 
     await workOrder.save();
 
+    await logActivity(req, `Uploaded work photos (${workOrder.workOrderId})`, 'workorder', workOrder._id, { before: beforePhotos?.length || 0, after: afterPhotos?.length || 0 });
+
     res.json({ success: true, message: 'Photos uploaded', workOrder });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -283,6 +290,8 @@ const addNotes = async (req, res) => {
 
     await workOrder.save();
 
+    await logActivity(req, `Updated service notes/materials (${workOrder.workOrderId})`, 'workorder', workOrder._id);
+
     res.json({ success: true, message: 'Notes updated', workOrder });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -311,6 +320,8 @@ const captureSignature = async (req, res) => {
     workOrder.signatureDate = new Date();
 
     await workOrder.save();
+
+    await logActivity(req, `Captured customer signature (${workOrder.workOrderId})`, 'workorder', workOrder._id);
 
     res.json({ success: true, message: 'Signature captured', workOrder });
   } catch (error) {
@@ -366,6 +377,8 @@ const completeWorkOrder = async (req, res) => {
     if (workOrder.customerEmail) {
       await sendEmail(emailTemplates.serviceReport(workOrder, report.url));
     }
+
+    await logActivity(req, `Completed work order and generated report (${workOrder.workOrderId})`, 'workorder', workOrder._id);
 
     res.json({
       success: true,
@@ -448,6 +461,8 @@ const uploadReportAndClose = async (req, res) => {
     });
 
     await workOrder.save();
+
+    await logActivity(req, `Uploaded final report and closed work (${workOrder.workOrderId})`, 'workorder', workOrder._id);
 
     res.json({ success: true, message: 'Report uploaded. Work order closed.', workOrder });
   } catch (error) {

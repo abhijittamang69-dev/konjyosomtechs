@@ -3,6 +3,7 @@ const Technician = require('../models/Technician');
 const Session = require('../models/Session');
 const generateToken = require('../utils/generateToken');
 const { sendEmail, emailTemplates } = require('../utils/emailService');
+const { logActivity } = require('../utils/activityLogger');
 const crypto = require('crypto');
 
 // @desc    Login user (auto-detect role)
@@ -48,6 +49,9 @@ const login = async (req, res) => {
 
     // Check first login for technicians
     const needsPasswordChange = user.role === 'technician' && user.firstLogin;
+
+    req.user = user; // for activity logging
+    await logActivity(req, `Logged in (${user.role})`, 'auth', user._id);
 
     res.json({
       success: true,
